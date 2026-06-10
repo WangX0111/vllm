@@ -177,10 +177,13 @@ class DeepSeekV4MultiTokenPredictor(nn.Module):
             vllm_config.scheduler_config.max_num_batched_tokens,
             topk_tokens,
             dtype=torch.int32,
+            device=self.device,
         )
 
         # Three aux streams shared across all MTP layers, mirroring DeepseekV4Model.
-        aux_stream_list = [torch.cuda.Stream() for _ in range(3)]
+        aux_stream_list = (
+            [torch.cuda.Stream(self.device) for _ in range(3)]
+        )
 
         # to map the exact layer index from weights
         self.layers = torch.nn.ModuleDict(
